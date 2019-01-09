@@ -4,23 +4,14 @@
 
 std::mutex pmp_mutex;
 
-// throw calls are deprecated in C+11 onwards.
-#if __cplusplus >= 201103L
-#define NOEXCEPT noexcept
-#define THROW_BAD_ALLOC
-#else
-#define NOEXCEPT throw ()
-#define THROW_BAD_ALLOC throw (std::bad_alloc)
-#endif
-
 // Global new and delete
 
-void* operator new(size_t sz) THROW_BAD_ALLOC {
+void* operator new(size_t sz) throw (std::bad_alloc) {
     void* ret = calloc(1, sz);
     return ret;
 }
 
-void operator delete(void *p, std::size_t sz) NOEXCEPT {
+void operator delete(void *p, std::size_t sz) throw () {
     if (LIBPM <= (unsigned long long) p && (unsigned long long) p <= LIBPM + PMSIZE)
 	pfree(p);
     else
@@ -29,26 +20,26 @@ void operator delete(void *p, std::size_t sz) NOEXCEPT {
     fprintf(stderr, "%p\n", p+sz);
 }
 
-void operator delete[](void *p, std::size_t sz) NOEXCEPT {
+void operator delete[](void *p, std::size_t sz) throw () {
 	assert(0);
 	fprintf(stderr, "%p\n", p+sz);
 	return;
 }
 
 
-void operator delete(void *p) NOEXCEPT {
+void operator delete(void *p) throw () {
     if (LIBPM <= (unsigned long long) p && (unsigned long long) p <= LIBPM + PMSIZE)
 	pfree(p);
     else
     	free(p);
 }
 
-void *operator new[](std::size_t sz) THROW_BAD_ALLOC {
+void *operator new[](std::size_t sz) throw (std::bad_alloc) {
     void* ret = calloc(1, sz);
     return ret;
 }
 
-void operator delete[](void *p) NOEXCEPT {
+void operator delete[](void *p) throw () {
     if (LIBPM <= (unsigned long long) p && (unsigned long long) p <= LIBPM + PMSIZE)
 	pfree(p);
     else
